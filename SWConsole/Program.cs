@@ -35,7 +35,10 @@ class Program
         const int RIGHTARROW = 0x27;
         const int LEFTARROW = 0x25;
         const int SPACEBAR = 0x20; 
-        const int PANICBUTTON = 0x43; // c
+        const int PANICBUTTON = 0x43; // C
+        const int REPAIRBUTTON = 0x52; // R
+        const int INFOBUTTON = 0x49; // I
+
 
 
         // create pupeteer page
@@ -133,6 +136,12 @@ class Program
             if (GetAsyncKeyState(PANICBUTTON) > 0 )
             {
                 await gameActions.ClearQueueAsync();
+            }
+
+            //info extension
+            if (GetAsyncKeyState(INFOBUTTON) > 0)
+            {
+               /* if ()*/
             }
 
             // movement
@@ -240,15 +249,23 @@ class Program
 
                 Console.WriteLine(angle);
 
+                // change angle and fire!
                 if (angle != lastAngle)
                 {
                     lastAngle = angle;
-                    // change angle and fire!
+                    
                     await gameActions.changeHeading(angle);
                 }
+                else
+                {
+                    await gameActions.FireWeaponAsync();
+                }
                 
-                await gameActions.FireWeaponAsync();
+                
             }
+
+            //weapon switching
+
 
 
 
@@ -307,23 +324,22 @@ class Program
         void printStatus()
         {
             Console.Clear();
-            Console.WriteLine($"Name: {username,-34} Token: {gameActions.Token}");
-            Console.WriteLine($"Left: {leftKey,-12} Right: {rightKey,-12} Forward: {forwardKey,-12} Fire: {fireKey,-12} Clear Queue: {clearQueueKey,-12}");
-            Console.WriteLine($"Info: {infoKey,-12}  Shop: {shopKey,-12}  Repair: {repairKey,-12} Read & Empty Messages: {readAndEmptyMessagesKey,-12}");
+            Console.WriteLine($"Name: {username,-34}");
+            Console.WriteLine($"Info-Mod-Key: I, Repair: R, Clear Queue: C, ARROW KEYS to move, SPACE to shoot.");
 
-            for (int i = 0; i < gameActions.Weapons.Count; i++)
+            for (int i = 0; i < Shop.Count; i++)
             {
-                string? weapon = gameActions.Weapons[i];
+                string? weapon = Shop[i].Name;
                 if (weapon == gameActions.CurrentWeapon)
                 {
-                    weapon = $"**{weapon}**";
+                    weapon = $"**{Shop[i].Name}**";
                 }
-                Console.Write($"{i + 1}: {weapon}   ");
+                Console.Write($"{i + 1}: {Shop[i].Name}   ");
             }
             Console.WriteLine();
 
 
-            if (gameActions.GameMessages.Any())
+            /*if (gameActions.GameMessages.Any())
             {
                 Console.WriteLine();
                 Console.WriteLine("Last 10 messages:");
@@ -333,7 +349,7 @@ class Program
                     Console.WriteLine($"{msg.Type,-30} {msg.Message}");
                 }
             }
-            Console.WriteLine(new string('=', Console.WindowWidth));
+            Console.WriteLine(new string('=', Console.WindowWidth));*/
         }
 
 
