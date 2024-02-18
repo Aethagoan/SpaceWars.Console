@@ -1,7 +1,6 @@
 ﻿using SpaceWarsServices;
 
 namespace SWConsole;
-public enum Direction { Right, Left }
 
 public class GameActions
 {
@@ -16,31 +15,21 @@ public class GameActions
         heading = joinGameResponse.Heading;
         PlayerName = playerName;
     }
-    public async Task RotateLeftAsync(bool quickTurn) => await rotate(Direction.Left, quickTurn);
+    
 
-    public async Task RotateRightAsync(bool quickTurn) => await rotate(Direction.Right, quickTurn);
-
-    private async Task rotate(Direction direction, bool quickTurn)
+    public async Task changeHeading(int heading)
     {
-        heading = (direction, quickTurn) switch
-        {
-            (Direction.Right, true) => heading + 10,
-            (Direction.Right, false) => heading + 1,
-            (Direction.Left, true) => heading - 10,
-            (Direction.Left, false) => heading - 1,
-            _ => 0,//turn north if someone calls this with a bogus Direction
-        };
         heading = ClampRotation(heading);
         await apiService.QueueAction([new("changeHeading", heading.ToString())]);
     }
+    
 
-    public async Task MoveForwardAsync(bool lightSpeed)
+    public async Task moveHeading(int heading)
     {
         heading = ClampRotation(heading);
-        var actions = Enumerable.Range(0, lightSpeed ? 10 : 1)
-                .Select(n => new QueueActionRequest("move", heading.ToString()));
-        await apiService.QueueAction(actions);
+        await apiService.QueueAction([new("move", heading.ToString())]);
     }
+
 
     public async Task FireWeaponAsync(string? weapon = null) => await apiService.QueueAction([new("fire", weapon ?? CurrentWeapon)]);
 

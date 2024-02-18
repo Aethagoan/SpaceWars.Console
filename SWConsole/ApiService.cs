@@ -76,4 +76,25 @@ public class ApiService
             return null;
         }
     }
+
+    public async Task<GameStateResponse> GetGameState()
+    {
+        try
+        {
+            return await _httpClient.GetFromJsonAsync<GameStateResponse>("/game/state");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+            return null;
+        }
+    }
+
+
+
+
+
+
+
+
 }

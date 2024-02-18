@@ -1,5 +1,11 @@
-﻿using SWConsole;
+﻿using PuppeteerSharp;
+using SWConsole;
 using System.Diagnostics;
+using System.Numerics;
+using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics;
+using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 
 namespace SpaceWarsServices;
 
@@ -15,12 +21,34 @@ class Program
         const ConsoleKey forwardKey = ConsoleKey.UpArrow;
         const ConsoleKey leftKey = ConsoleKey.LeftArrow;
         const ConsoleKey rightKey = ConsoleKey.RightArrow;
+        const ConsoleKey downKey = ConsoleKey.DownArrow;
         const ConsoleKey fireKey = ConsoleKey.Spacebar;
         const ConsoleKey clearQueueKey = ConsoleKey.C;
         const ConsoleKey infoKey = ConsoleKey.I;
         const ConsoleKey shopKey = ConsoleKey.S;
         const ConsoleKey repairKey = ConsoleKey.R;
         const ConsoleKey readAndEmptyMessagesKey = ConsoleKey.M;
+
+        // this should work much better.
+        const int UPARROW = 0x26;
+        const int DOWNARROW = 0x28;
+        const int RIGHTARROW = 0x27;
+        const int LEFTARROW = 0x25;
+        const int SPACEBAR = 0x20; 
+        const int PANICBUTTON = 0x43; // c
+
+
+        // create pupeteer page
+        using var browserFetcher = new BrowserFetcher();
+        await browserFetcher.DownloadAsync();
+        var browser = await Puppeteer.LaunchAsync(new LaunchOptions
+        {
+            Headless = true
+        });
+        var page = await browser.NewPageAsync();
+        
+
+
 
         Uri baseAddress = getApiBaseAddress(args);
         using HttpClient httpClient = new HttpClient() { BaseAddress = baseAddress };
@@ -33,6 +61,9 @@ class Program
 
         Console.WriteLine("Please enter your name");
         var username = Console.ReadLine();
+
+
+
         try
         {
             joinGameResponse = await service.JoinGameAsync(username);
@@ -44,39 +75,185 @@ class Program
             Console.WriteLine($"Ship located at: {joinGameResponse.StartingLocation}, Game State is: {joinGameResponse.GameState}, Board Dimensions: {joinGameResponse.BoardWidth}, {joinGameResponse.BoardHeight}");
 
             OpenUrlInBrowser($"{baseAddress.AbsoluteUri}hud?token={token}");
+            OpenUrlInBrowser($"{baseAddress.AbsoluteUri}/spectatorview");
         }
-        catch (Exception ex)
+        catch (Exception ex)                                              
         {
             Console.WriteLine($"Error: {ex.Message}");
         }
+
+        // pupeteer page go to the page
+        await page.GoToAsync($"{baseAddress.AbsoluteUri}hud?token={token}");
+
+        // how to get the current position from the page
+        async Task<int[]> getCurrentPosition()
+        {
+            // is the p there?
+            await page.WaitForSelectorAsync("p");
+            var result = await page.EvaluateFunctionAsync<dynamic>(@"function getValues(){
+                    ps = document.querySelectorAll(""p"")
+                    newstring = ps[0].innerText.slice(16, ps[0].innerText.length - 1)
+
+                    numbers = newstring.split("", "");
+
+                    console.log(numbers)
+
+                    return numbers
+                }");
+
+            /*Console.WriteLine("Puppeteer returned " +  result + " as the current position");*/
+
+            int[] newarr = new int[2];
+                
+            for (int i = 0; i < 2; i++)
+            {
+                newarr[i] = result[i];
+            }
+
+            return newarr;
+        }
+
 
         var gameActions = new GameActions(username, joinGameResponse, service);
         gameActions.Weapons.Add("Basic Cannon");
         gameActions.CurrentWeapon = "Basic Cannon";
 
+        // thank you, reddit.
+        [DllImport("user32.dll")]
+        static extern int GetAsyncKeyState(int key);
+
+        printStatus();
+
+        int? lastAngle;
+
         while (!exitGame)
         {
-            printStatus();
-            ConsoleKeyInfo keyInfo = Console.ReadKey(true); // Read key without displaying it
-            bool shiftPressed = keyInfo.Modifiers.HasFlag(ConsoleModifiers.Shift);
 
-            switch (keyInfo.Key)
+            //panic button
+            if (GetAsyncKeyState(PANICBUTTON) > 0 )
             {
-                case var key when key == forwardKey:
-                    await gameActions.MoveForwardAsync(shiftPressed);
-                    break;
-                case var key when key == leftKey:
-                    await gameActions.RotateLeftAsync(shiftPressed);
-                    break;
-                case var key when key == rightKey:
-                    await gameActions.RotateRightAsync(shiftPressed);
-                    break;
-                case var key when key == fireKey:
-                    await gameActions.FireWeaponAsync();
-                    break;
-                case var key when key == clearQueueKey:
-                    await gameActions.ClearQueueAsync();
-                    break;
+                await gameActions.ClearQueueAsync();
+            }
+
+            // movement
+            // up is pressed
+            if (GetAsyncKeyState(UPARROW) > 0)
+            {
+                // up, left
+                if (GetAsyncKeyState(LEFTARROW) > 0)
+                {
+                    await gameActions.moveHeading(315);
+                }
+                // up right
+                else if (GetAsyncKeyState (RIGHTARROW) > 0)
+                {
+                    await gameActions.moveHeading(45);
+                }
+                // just up
+                else
+                {
+                    await gameActions.moveHeading(0);
+                }
+            }
+            // down is pressed
+            else if (GetAsyncKeyState(DOWNARROW) > 0)
+            {
+                // down, left
+                if (GetAsyncKeyState(LEFTARROW) > 0)
+                {
+                    await gameActions.moveHeading(225);
+                }
+                // down, right
+                else if (GetAsyncKeyState(RIGHTARROW) > 0)
+                {
+                    await gameActions.moveHeading(135);
+                }
+                // just down
+                else
+                {
+                    await gameActions.moveHeading(180);
+                }
+            }
+            // left
+            else if (GetAsyncKeyState(LEFTARROW) > 0)
+            {
+                await gameActions.moveHeading(270);
+            }
+            // right
+            else if (GetAsyncKeyState(RIGHTARROW) > 0)
+            {
+                await gameActions.moveHeading(90);
+            }
+
+            
+            
+            // are we shooting?
+            if (GetAsyncKeyState(SPACEBAR) > 0)
+            {
+                // find the closest target
+
+                // get my position
+                var myposarr = getCurrentPosition();
+                Vector2 currentpos = new Vector2((float)myposarr.Result[0], (float)myposarr.Result[1]);
+
+                // get enemy positions
+                GameStateResponse gameresponse = service.GetGameState().Result;
+
+                /*Console.WriteLine("API Returned ");
+                foreach (var local in gameresponse.PlayerLocations)
+                {
+                    Console.WriteLine(local.X + ", " + local.Y);
+                }*/
+
+                Vector2 enemypos = new();
+                Vector2 closestEnemy;
+                float? shortest;
+
+                foreach (var location in gameresponse.PlayerLocations)
+                {
+                    if (location.X == currentpos.X && location.Y == currentpos.Y)
+                    {
+                        continue;
+                    }
+
+                    enemypos = new Vector2(location.X, location.Y);
+                    var dist = Vector2.Distance(currentpos, enemypos);
+
+                    if (shortest == null || dist < shortest)
+                    {
+                        shortest = dist;
+                        closestEnemy = enemypos;
+                    }
+
+                }
+
+                /*Console.WriteLine("current pos : " + currentpos.X + ", " +  currentpos.Y);
+                Console.WriteLine("targeted enemy pos : " + closestEnemy.X + ", " +  closestEnemy.Y);
+*/
+                // we have closest enemy
+
+                // calculate angle between them
+                var radian = Math.Atan2((double)(closestEnemy.Y - currentpos.Y), (double)(closestEnemy.X - currentpos.X ));
+                /*Console.WriteLine("radian: " + radian);*/
+
+                var angle = ((int)( -1 * radian * (180 / Math.PI)) + 90) % 360;
+
+                Console.WriteLine(angle);
+
+                if (angle != lastAngle)
+                {
+                    lastAngle = angle;
+                    // change angle and fire!
+                    await gameActions.changeHeading(angle);
+                }
+                
+                await gameActions.FireWeaponAsync();
+            }
+
+
+
+           /* switch ()
+            {
                 case var key when key == repairKey:
                     await gameActions.RepairShipAsync();
                     Console.WriteLine("Ship repair requested.");
@@ -124,7 +301,7 @@ class Program
                 case ConsoleKey.N:
                     //example
                     break;
-            }
+            }*/
         }
 
         void printStatus()
@@ -158,6 +335,8 @@ class Program
             }
             Console.WriteLine(new string('=', Console.WindowWidth));
         }
+
+
     }
 
 
@@ -195,4 +374,6 @@ class Program
             Console.WriteLine($"Error opening URL in browser: {ex.Message}");
         }
     }
+
+    
 }
