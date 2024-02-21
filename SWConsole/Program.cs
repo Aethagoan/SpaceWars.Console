@@ -307,23 +307,32 @@ class Program
                 Vector2 closestEnemy;
                 float? shortest;
 
-                foreach (var location in gameresponse.PlayerLocations)
+                if(gameresponse.PlayerLocations != null)
                 {
-                    if (location.X == currentpos.X && location.Y == currentpos.Y)
-                    {
-                        continue;
-                    }
+                    foreach (var location in gameresponse.PlayerLocations)
+                                    {
+                                        if (location.X == currentpos.X && location.Y == currentpos.Y)
+                                        {
+                                            continue;
+                                        }
 
-                    enemypos = new Vector2(location.X, location.Y);
-                    var dist = Vector2.Distance(currentpos, enemypos);
+                                        enemypos = new Vector2(location.X, location.Y);
+                                        var dist = Vector2.Distance(currentpos, enemypos);
 
-                    if (shortest == null || dist < shortest)
-                    {
-                        shortest = dist;
-                        closestEnemy = enemypos;
-                    }
+                                        if (shortest == null || dist < shortest)
+                                        {
+                                            shortest = dist;
+                                            closestEnemy = enemypos;
+                                        }
+
+                                    }
 
                 }
+                else 
+                {
+                    Console.WriteLine("fail");
+                }
+                
 
                 /*Console.WriteLine("current pos : " + currentpos.X + ", " +  currentpos.Y);
                 Console.WriteLine("targeted enemy pos : " + closestEnemy.X + ", " +  closestEnemy.Y);
@@ -710,6 +719,8 @@ class Program
                             try
                             {
                                 await gameActions.PurchaseItemAsync(Shop[8].Name);
+                                Console.Clear();
+                                printStatus();
                                 await gameActions.ReadAndEmptyMessagesAsync();
                                 gameActions.SelectWeapon(Shop[8].Name);
                                 Console.Clear();
@@ -768,6 +779,13 @@ class Program
                 }
             }
 
+            // repair
+
+            if (GetAsyncKeyState(REPAIRBUTTON) > 0)
+            {
+                await gameActions.ClearQueueAsync();
+                await gameActions.RepairShipAsync();
+            }
 
             /* switch ()
              {
