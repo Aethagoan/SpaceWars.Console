@@ -63,7 +63,7 @@ class Program
         JoinGameResponse joinGameResponse = null;
 
         Console.WriteLine("Please enter your name");
-        var username = Console.ReadLine();
+        var username = "Test1";
 
 
 
@@ -247,7 +247,7 @@ class Program
 
                 var angle = ((int)( -1 * radian * (180 / Math.PI)) + 90) % 360;
 
-                Console.WriteLine(angle);
+                /*Console.WriteLine(angle);*/
 
                 // change angle and fire!
                 if (angle != lastAngle)
