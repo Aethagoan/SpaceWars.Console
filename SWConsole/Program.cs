@@ -345,10 +345,8 @@ class Program
 
                     await gameActions.changeHeading(angle);
                 }
-                else
-                {
-                    await gameActions.FireWeaponAsync();
-                }
+                
+                await gameActions.FireWeaponAsync();
 
 
             }
@@ -836,10 +834,10 @@ class Program
                 {
                     weapon = $"**{Shop[i].Name}**";
                 }
-                Console.Write($"{i + 1}: {Shop[i].Name}   ");
+                Console.Write($"{i + 1}: {weapon}   ");
             }
             Console.WriteLine();
-            Console.WriteLine(gameActions.CurrentWeapon);
+            /*Console.WriteLine(gameActions.CurrentWeapon);*/
 
 
             /*if (gameActions.GameMessages.Any())
