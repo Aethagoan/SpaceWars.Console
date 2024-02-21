@@ -58,13 +58,15 @@ public class GameActions
         }
     }
 
-    internal void SelectWeapon(ConsoleKey key)
+    internal void SelectWeapon(string name)
     {
-        char c = (char)key;
-        int index = c - '1';
-        if (Weapons.Count > index)
+        foreach (var weapon in Weapons)
         {
-            CurrentWeapon = Weapons[index];
+            if (weapon == name)
+            {
+                CurrentWeapon = weapon;
+                break;
+            }
         }
     }
 

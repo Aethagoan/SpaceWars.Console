@@ -34,7 +34,7 @@ class Program
         const int DOWNARROW = 0x28;
         const int RIGHTARROW = 0x27;
         const int LEFTARROW = 0x25;
-        const int SPACEBAR = 0x20; 
+        const int SPACEBAR = 0x20;
         const int PANICBUTTON = 0x43; // C
         const int REPAIRBUTTON = 0x52; // R
         const int INFOBUTTON = 0x49; // I
@@ -49,7 +49,7 @@ class Program
             Headless = true
         });
         var page = await browser.NewPageAsync();
-        
+
 
 
 
@@ -78,9 +78,9 @@ class Program
             Console.WriteLine($"Ship located at: {joinGameResponse.StartingLocation}, Game State is: {joinGameResponse.GameState}, Board Dimensions: {joinGameResponse.BoardWidth}, {joinGameResponse.BoardHeight}");
 
             OpenUrlInBrowser($"{baseAddress.AbsoluteUri}hud?token={token}");
-            OpenUrlInBrowser($"{baseAddress.AbsoluteUri}/spectatorview");
+            OpenUrlInBrowser($"{baseAddress.AbsoluteUri}spectatorview");
         }
-        catch (Exception ex)                                              
+        catch (Exception ex)
         {
             Console.WriteLine($"Error: {ex.Message}");
         }
@@ -107,7 +107,7 @@ class Program
             /*Console.WriteLine("Puppeteer returned " +  result + " as the current position");*/
 
             int[] newarr = new int[2];
-                
+
             for (int i = 0; i < 2; i++)
             {
                 newarr[i] = result[i];
@@ -133,7 +133,7 @@ class Program
         {
 
             //panic button
-            if (GetAsyncKeyState(PANICBUTTON) > 0 )
+            if (GetAsyncKeyState(PANICBUTTON) > 0)
             {
                 await gameActions.ClearQueueAsync();
             }
@@ -141,7 +141,96 @@ class Program
             //info extension
             if (GetAsyncKeyState(INFOBUTTON) > 0)
             {
-               /* if ()*/
+                if (GetAsyncKeyState(0x31) > 0)
+                {
+                    if (Shop.Count >= 1)
+                    {
+                        Console.Clear();
+                        printStatus();
+                        Console.WriteLine(Shop[0]);
+                    }
+                }
+                else if (GetAsyncKeyState(0x32) > 0)
+                {
+                    if (Shop.Count >= 2)
+                    {
+                        Console.Clear();
+                        printStatus();
+                        Console.WriteLine(Shop[1]);
+                    }
+                }
+                else if (GetAsyncKeyState(0x33) > 0)
+                {
+                    if (Shop.Count >= 3)
+                    {
+                        Console.Clear();
+                        printStatus();
+                        Console.WriteLine(Shop[2]);
+                    }
+                }
+                else if (GetAsyncKeyState(0x34) > 0)
+                {
+                    if (Shop.Count >= 4)
+                    {
+                        Console.Clear();
+                        printStatus();
+                        Console.WriteLine(Shop[3]);
+                    }
+                }
+                else if (GetAsyncKeyState(0x35) > 0)
+                {
+                    if (Shop.Count >= 5)
+                    {
+                        Console.Clear();
+                        printStatus();
+                        Console.WriteLine(Shop[4]);
+                    }
+                }
+                else if (GetAsyncKeyState(0x36) > 0)
+                {
+                    if (Shop.Count >= 6)
+                    {
+                        Console.Clear();
+                        printStatus();
+                        Console.WriteLine(Shop[5]);
+                    }
+                }
+                else if (GetAsyncKeyState(0x37) > 0)
+                {
+                    if (Shop.Count >= 7)
+                    {
+                        Console.Clear();
+                        printStatus();
+                        Console.WriteLine(Shop[6]);
+                    }
+                }
+                else if (GetAsyncKeyState(0x38) > 0)
+                {
+                    if (Shop.Count >= 8)
+                    {
+                        Console.Clear();
+                        printStatus();
+                        Console.WriteLine(Shop[7]);
+                    }
+                }
+                else if (GetAsyncKeyState(0x39) > 0)
+                {
+                    if (Shop.Count >= 9)
+                    {
+                        Console.Clear();
+                        printStatus();
+                        Console.WriteLine(Shop[8]);
+                    }
+                }
+                else if (GetAsyncKeyState(0x30) > 0)
+                {
+                    if (Shop.Count >= 10)
+                    {
+                        Console.Clear();
+                        printStatus();
+                        Console.WriteLine(Shop[9]);
+                    }
+                }
             }
 
             // movement
@@ -154,7 +243,7 @@ class Program
                     await gameActions.moveHeading(315);
                 }
                 // up right
-                else if (GetAsyncKeyState (RIGHTARROW) > 0)
+                else if (GetAsyncKeyState(RIGHTARROW) > 0)
                 {
                     await gameActions.moveHeading(45);
                 }
@@ -194,8 +283,8 @@ class Program
                 await gameActions.moveHeading(90);
             }
 
-            
-            
+
+
             // are we shooting?
             if (GetAsyncKeyState(SPACEBAR) > 0)
             {
@@ -242,10 +331,10 @@ class Program
                 // we have closest enemy
 
                 // calculate angle between them
-                var radian = Math.Atan2((double)(closestEnemy.Y - currentpos.Y), (double)(closestEnemy.X - currentpos.X ));
+                var radian = Math.Atan2((double)(closestEnemy.Y - currentpos.Y), (double)(closestEnemy.X - currentpos.X));
                 /*Console.WriteLine("radian: " + radian);*/
 
-                var angle = ((int)( -1 * radian * (180 / Math.PI)) + 90) % 360;
+                var angle = ((int)(-1 * radian * (180 / Math.PI)) + 90) % 360;
 
                 /*Console.WriteLine(angle);*/
 
@@ -253,72 +342,483 @@ class Program
                 if (angle != lastAngle)
                 {
                     lastAngle = angle;
-                    
+
                     await gameActions.changeHeading(angle);
                 }
-                else
-                {
-                    await gameActions.FireWeaponAsync();
-                }
                 
-                
+                await gameActions.FireWeaponAsync();
+
+
             }
 
             //weapon switching
-
-
-
-
-           /* switch ()
+            // if not holding i
+            if (!(GetAsyncKeyState(INFOBUTTON) > 0))
             {
-                case var key when key == repairKey:
-                    await gameActions.RepairShipAsync();
-                    Console.WriteLine("Ship repair requested.");
-                    break;
-                case var key when key == infoKey:
-                    foreach (var item in Shop)
+                if (GetAsyncKeyState(0x31) > 0)
+                {
+                    // if theres a thing in the shop here
+                    if (1 <= Shop.Count)
                     {
-                        Console.WriteLine($"upgrade: {item.Name}, cost: {item.Cost}");
-                        Console.WriteLine("Press any key to continue.");
-                        Console.ReadKey();
-                    }
-                    break;
-                case var key when key == shopKey:
+                        bool bought = false;
+                        // if we havent bought it
+                        foreach (var weapon in gameActions.Weapons)
+                        {
+                            if (weapon == Shop[0].Name)
+                            {
+                                bought = true;
+                            }
+                        }
 
-                    Console.WriteLine("please enter what you'd like to purchase from the shop, (if you've changed your mind enter x)");
-                    var response = Console.ReadLine();
-                    if (response == "x")
-                    {
-                        continue;
-                    }
+                        if (bought)
+                        {
+                            gameActions.SelectWeapon(Shop[0].Name);
+                            Console.Clear();
+                            printStatus();
+                        }
+                        else
+                        {
+                            try
+                            {
+                                await gameActions.PurchaseItemAsync(Shop[0].Name);
+                                await gameActions.ReadAndEmptyMessagesAsync();
+                                gameActions.SelectWeapon(Shop[0].Name);
+                                Console.Clear();
+                                printStatus();
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.Clear();
+                                printStatus();
+                                Console.WriteLine(ex.Message);
+                            }
+                        }
 
-                    if (Shop.Any(item => item.Name.Equals(response, StringComparison.OrdinalIgnoreCase)))
-                    {
-                        await gameActions.PurchaseItemAsync(response);
-                        Console.WriteLine($"Purchase of {response} requested.");
                     }
-                    else
+                }
+                else if (GetAsyncKeyState(0x32) > 0)
+                {
+                    // if theres a thing in the shop here
+                    if (2 <= Shop.Count)
                     {
-                        Console.WriteLine("Invalid item. Please choose a valid item from the shop.");
+                        bool bought = false;
+                        // if we havent bought it
+                        foreach (var weapon in gameActions.Weapons)
+                        {
+                            if (weapon == Shop[1].Name)
+                            {
+                                bought = true;
+                            }
+                        }
+
+                        if (bought)
+                        {
+                            gameActions.SelectWeapon(Shop[1].Name);
+                            Console.Clear();
+                            printStatus();
+                        }
+                        else
+                        {
+                            try
+                            {
+                                await gameActions.PurchaseItemAsync(Shop[1].Name);
+                                await gameActions.ReadAndEmptyMessagesAsync();
+                                gameActions.SelectWeapon(Shop[1].Name);
+                                Console.Clear();
+                                printStatus();
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.Clear();
+                                printStatus();
+                                Console.WriteLine(ex.Message);
+                            }
+                        }
+
                     }
-                    break;
-                case var key when key == readAndEmptyMessagesKey:
-                    await gameActions.ReadAndEmptyMessagesAsync();
-                    Console.WriteLine("Message queue read.");
-                    break;
-                case var key when key >= ConsoleKey.D0 && key <= ConsoleKey.D9:
-                    gameActions.SelectWeapon(key);
-                    Console.WriteLine($"Selected weapon {((char)key) - '1'} ({gameActions.CurrentWeapon}");
-                    break;
-                //**************************************************************************************
-                //***  |    |    |    |                                            |    |    |    |    |
-                //***  |    |    |    |       Add any other custom keys here       |    |    |    |    |
-                //***  V    V    V    V                                            V    V    V    V    V
-                //**************************************************************************************
-                case ConsoleKey.N:
-                    //example
-                    break;
-            }*/
+                }
+                else if (GetAsyncKeyState(0x33) > 0)
+                {
+                    // if theres a thing in the shop here
+                    if (3 <= Shop.Count)
+                    {
+                        bool bought = false;
+                        // if we havent bought it
+                        foreach (var weapon in gameActions.Weapons)
+                        {
+                            if (weapon == Shop[2].Name)
+                            {
+                                bought = true;
+                            }
+                        }
+
+                        if (bought)
+                        {
+                            gameActions.SelectWeapon(Shop[2].Name);
+                            Console.Clear();
+                            printStatus();
+                        }
+                        else
+                        {
+                            try
+                            {
+                                await gameActions.PurchaseItemAsync(Shop[2].Name);
+                                await gameActions.ReadAndEmptyMessagesAsync();
+                                gameActions.SelectWeapon(Shop[2].Name);
+                                Console.Clear();
+                                printStatus();
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.Clear();
+                                printStatus();
+                                Console.WriteLine(ex.Message);
+                            }
+                        }
+
+                    }
+                }
+                else if (GetAsyncKeyState(0x34) > 0)
+                {
+                    // if theres a thing in the shop here
+                    if (4 <= Shop.Count)
+                    {
+                        bool bought = false;
+                        // if we havent bought it
+                        foreach (var weapon in gameActions.Weapons)
+                        {
+                            if (weapon == Shop[3].Name)
+                            {
+                                bought = true;
+                            }
+                        }
+
+                        if (bought)
+                        {
+                            gameActions.SelectWeapon(Shop[3].Name);
+                            Console.Clear();
+                            printStatus();
+                        }
+                        else
+                        {
+                            try
+                            {
+                                await gameActions.PurchaseItemAsync(Shop[3].Name);
+                                await gameActions.ReadAndEmptyMessagesAsync();
+                                gameActions.SelectWeapon(Shop[3].Name);
+                                Console.Clear();
+                                printStatus();
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.Clear();
+                                printStatus();
+                                Console.WriteLine(ex.Message);
+                            }
+                        }
+
+                    }
+                }
+                else if (GetAsyncKeyState(0x35) > 0)
+                {
+                    // if theres a thing in the shop here
+                    if (5 <= Shop.Count)
+                    {
+                        bool bought = false;
+                        // if we havent bought it
+                        foreach (var weapon in gameActions.Weapons)
+                        {
+                            if (weapon == Shop[4].Name)
+                            {
+                                bought = true;
+                            }
+                        }
+
+                        if (bought)
+                        {
+                            gameActions.SelectWeapon(Shop[4].Name);
+                            Console.Clear();
+                            printStatus();
+                        }
+                        else
+                        {
+                            try
+                            {
+                                await gameActions.PurchaseItemAsync(Shop[4].Name);
+                                await gameActions.ReadAndEmptyMessagesAsync();
+                                gameActions.SelectWeapon(Shop[4].Name);
+                                Console.Clear();
+                                printStatus();
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.Clear();
+                                printStatus();
+                                Console.WriteLine(ex.Message);
+                            }
+
+                        }
+
+                    }
+                }
+                else if (GetAsyncKeyState(0x36) > 0)
+                {
+                    // if theres a thing in the shop here
+                    if (6 <= Shop.Count)
+                    {
+                        bool bought = false;
+                        // if we havent bought it
+                        foreach (var weapon in gameActions.Weapons)
+                        {
+                            if (weapon == Shop[5].Name)
+                            {
+                                bought = true;
+                            }
+                        }
+
+                        if (bought)
+                        {
+                            gameActions.SelectWeapon(Shop[5].Name);
+                            Console.Clear();
+                            printStatus();
+                        }
+                        else
+                        {
+                            try
+                            {
+                                await gameActions.PurchaseItemAsync(Shop[5].Name);
+                                await gameActions.ReadAndEmptyMessagesAsync();
+                                gameActions.SelectWeapon(Shop[5].Name);
+                                Console.Clear();
+                                printStatus();
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.Clear();
+                                printStatus();
+                                Console.WriteLine(ex.Message);
+                            }
+                        }
+
+                    }
+                }
+                else if (GetAsyncKeyState(0x37) > 0)
+                {
+                    // if theres a thing in the shop here
+                    if (7 <= Shop.Count)
+                    {
+                        bool bought = false;
+                        // if we havent bought it
+                        foreach (var weapon in gameActions.Weapons)
+                        {
+                            if (weapon == Shop[6].Name)
+                            {
+                                bought = true;
+                            }
+                        }
+
+                        if (bought)
+                        {
+                            gameActions.SelectWeapon(Shop[6].Name);
+                            Console.Clear();
+                            printStatus();
+                        }
+                        else
+                        {
+                            try
+                            {
+                                await gameActions.PurchaseItemAsync(Shop[6].Name);
+                                await gameActions.ReadAndEmptyMessagesAsync();
+                                gameActions.SelectWeapon(Shop[6].Name);
+                                Console.Clear();
+                                printStatus();
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.Clear();
+                                printStatus();
+                                Console.WriteLine(ex.Message);
+                            }
+                        }
+
+                    }
+                }
+                else if (GetAsyncKeyState(0x38) > 0)
+                {
+                    // if theres a thing in the shop here
+                    if (8 <= Shop.Count)
+                    {
+                        bool bought = false;
+                        // if we havent bought it
+                        foreach (var weapon in gameActions.Weapons)
+                        {
+                            if (weapon == Shop[7].Name)
+                            {
+                                bought = true;
+                            }
+                        }
+
+                        if (bought)
+                        {
+                            gameActions.SelectWeapon(Shop[7].Name);
+                            Console.Clear();
+                            printStatus();
+                        }
+                        else
+                        {
+                            try
+                            {
+                                await gameActions.PurchaseItemAsync(Shop[7].Name);
+                                await gameActions.ReadAndEmptyMessagesAsync();
+                                gameActions.SelectWeapon(Shop[7].Name);
+                                Console.Clear();
+                                printStatus();
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.Clear();
+                                printStatus();
+                                Console.WriteLine(ex.Message);
+                            }
+                        }
+
+                    }
+                }
+                else if (GetAsyncKeyState(0x39) > 0)
+                {
+                    // if theres a thing in the shop here
+                    if (9 <= Shop.Count)
+                    {
+                        bool bought = false;
+                        // if we havent bought it
+                        foreach (var weapon in gameActions.Weapons)
+                        {
+                            if (weapon == Shop[8].Name)
+                            {
+                                bought = true;
+                            }
+                        }
+
+                        if (bought)
+                        {
+                            gameActions.SelectWeapon(Shop[8].Name);
+                            Console.Clear();
+                            printStatus();
+                        }
+                        else
+                        {
+                            try
+                            {
+                                await gameActions.PurchaseItemAsync(Shop[8].Name);
+                                await gameActions.ReadAndEmptyMessagesAsync();
+                                gameActions.SelectWeapon(Shop[8].Name);
+                                Console.Clear();
+                                printStatus();
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.Clear();
+                                printStatus();
+                                Console.WriteLine(ex.Message);
+                            }
+                        }
+
+                    }
+                }
+                else if (GetAsyncKeyState(0x30) > 0)
+                {
+                    // if theres a thing in the shop here
+                    if (10 <= Shop.Count)
+                    {
+                        bool bought = false;
+                        // if we havent bought it
+                        foreach (var weapon in gameActions.Weapons)
+                        {
+                            if (weapon == Shop[9].Name)
+                            {
+                                bought = true;
+                            }
+                        }
+
+                        if (bought)
+                        {
+                            gameActions.SelectWeapon(Shop[9].Name);
+                            Console.Clear();
+                            printStatus();
+                        }
+                        else
+                        {
+                            try
+                            {
+                                await gameActions.PurchaseItemAsync(Shop[9].Name);
+                                await gameActions.ReadAndEmptyMessagesAsync();
+                                gameActions.SelectWeapon(Shop[9].Name);
+                                Console.Clear();
+                                printStatus();
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.Clear();
+                                printStatus();
+                                Console.WriteLine(ex.Message);
+                            }
+                        }
+
+                    }
+                }
+            }
+
+
+            /* switch ()
+             {
+                 case var key when key == repairKey:
+                     await gameActions.RepairShipAsync();
+                     Console.WriteLine("Ship repair requested.");
+                     break;
+                 case var key when key == infoKey:
+                     foreach (var item in Shop)
+                     {
+                         Console.WriteLine($"upgrade: {item.Name}, cost: {item.Cost}");
+                         Console.WriteLine("Press any key to continue.");
+                         Console.ReadKey();
+                     }
+                     break;
+                 case var key when key == shopKey:
+
+                     Console.WriteLine("please enter what you'd like to purchase from the shop, (if you've changed your mind enter x)");
+                     var response = Console.ReadLine();
+                     if (response == "x")
+                     {
+                         continue;
+                     }
+
+                     if (Shop.Any(item => item.Name.Equals(response, StringComparison.OrdinalIgnoreCase)))
+                     {
+                         await gameActions.PurchaseItemAsync(response);
+                         Console.WriteLine($"Purchase of {response} requested.");
+                     }
+                     else
+                     {
+                         Console.WriteLine("Invalid item. Please choose a valid item from the shop.");
+                     }
+                     break;
+                 case var key when key == readAndEmptyMessagesKey:
+                     await gameActions.ReadAndEmptyMessagesAsync();
+                     Console.WriteLine("Message queue read.");
+                     break;
+                 case var key when key >= ConsoleKey.D0 && key <= ConsoleKey.D9:
+                     gameActions.SelectWeapon(key);
+                     Console.WriteLine($"Selected weapon {((char)key) - '1'} ({gameActions.CurrentWeapon}");
+                     break;
+                 //**************************************************************************************
+                 //***  |    |    |    |                                            |    |    |    |    |
+                 //***  |    |    |    |       Add any other custom keys here       |    |    |    |    |
+                 //***  V    V    V    V                                            V    V    V    V    V
+                 //**************************************************************************************
+                 case ConsoleKey.N:
+                     //example
+                     break;
+             }*/
         }
 
         void printStatus()
@@ -334,9 +834,10 @@ class Program
                 {
                     weapon = $"**{Shop[i].Name}**";
                 }
-                Console.Write($"{i + 1}: {Shop[i].Name}   ");
+                Console.Write($"{i + 1}: {weapon}   ");
             }
             Console.WriteLine();
+            /*Console.WriteLine(gameActions.CurrentWeapon);*/
 
 
             /*if (gameActions.GameMessages.Any())
@@ -391,5 +892,5 @@ class Program
         }
     }
 
-    
+
 }
