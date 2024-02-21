@@ -783,7 +783,6 @@ class Program
 
             if (GetAsyncKeyState(REPAIRBUTTON) > 0)
             {
-                await gameActions.ClearQueueAsync();
                 await gameActions.RepairShipAsync();
             }
 
