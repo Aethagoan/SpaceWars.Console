@@ -35,7 +35,7 @@ class Program
         const int RIGHTARROW = 0x27;
         const int LEFTARROW = 0x25;
         const int SPACEBAR = 0x20;
-        const int PANICBUTTON = 0x43; // C
+        const int PANICBUTTON = 0x56; // V
         const int REPAIRBUTTON = 0x52; // R
         const int INFOBUTTON = 0x49; // I
 
@@ -309,23 +309,26 @@ class Program
 
                 if (gameresponse.PlayerLocations != null)
                 {
-                    foreach (var location in gameresponse.PlayerLocations)
-                    {
-                        if (location.X == currentpos.X && location.Y == currentpos.Y)
+             
+                        foreach (var location in gameresponse.PlayerLocations)
                         {
-                            continue;
+                            if (location.X == currentpos.X && location.Y == currentpos.Y && (location.X != 0 && location.Y != 0))
+                            {
+                                continue;
+                            }
+
+                            enemypos = new Vector2(location.X, location.Y);
+                            var dist = Vector2.Distance(currentpos, enemypos);
+
+                            if (shortest == null || dist < shortest)
+                            {
+                                shortest = dist;
+                                closestEnemy = enemypos;
+                            }
+
                         }
 
-                        enemypos = new Vector2(location.X, location.Y);
-                        var dist = Vector2.Distance(currentpos, enemypos);
-
-                        if (shortest == null || dist < shortest)
-                        {
-                            shortest = dist;
-                            closestEnemy = enemypos;
-                        }
-
-                    }
+                    
 
                 }
                 else
@@ -345,14 +348,19 @@ class Program
 
                 var angle = ((int)(-1 * radian * (180 / Math.PI)) + 90) % 360;
 
-                /*Console.WriteLine(angle);*/
+                
 
                 // change angle and fire!
                 if (angle != lastAngle)
                 {
                     lastAngle = angle;
-
+                    await gameActions.ClearQueueAsync();
                     await gameActions.changeHeading(angle);
+                    Console.Clear();
+                    printStatus();
+                    Console.WriteLine(angle);
+                    Console.WriteLine(closestEnemy.X + ", " + closestEnemy.Y);
+
                 }
 
                 await gameActions.FireWeaponAsync();
@@ -391,6 +399,7 @@ class Program
                             {
                                 await gameActions.PurchaseItemAsync(Shop[0].Name);
                                 await gameActions.ReadAndEmptyMessagesAsync();
+                                Thread.Sleep(50);
                                 gameActions.SelectWeapon(Shop[0].Name);
                                 Console.Clear();
                                 printStatus();
@@ -432,6 +441,7 @@ class Program
                             {
                                 await gameActions.PurchaseItemAsync(Shop[1].Name);
                                 await gameActions.ReadAndEmptyMessagesAsync();
+                                Thread.Sleep(50);
                                 gameActions.SelectWeapon(Shop[1].Name);
                                 Console.Clear();
                                 printStatus();
@@ -473,6 +483,7 @@ class Program
                             {
                                 await gameActions.PurchaseItemAsync(Shop[2].Name);
                                 await gameActions.ReadAndEmptyMessagesAsync();
+                                Thread.Sleep(50);
                                 gameActions.SelectWeapon(Shop[2].Name);
                                 Console.Clear();
                                 printStatus();
@@ -514,6 +525,7 @@ class Program
                             {
                                 await gameActions.PurchaseItemAsync(Shop[3].Name);
                                 await gameActions.ReadAndEmptyMessagesAsync();
+                                Thread.Sleep(50);
                                 gameActions.SelectWeapon(Shop[3].Name);
                                 Console.Clear();
                                 printStatus();
@@ -555,6 +567,7 @@ class Program
                             {
                                 await gameActions.PurchaseItemAsync(Shop[4].Name);
                                 await gameActions.ReadAndEmptyMessagesAsync();
+                                Thread.Sleep(50);
                                 gameActions.SelectWeapon(Shop[4].Name);
                                 Console.Clear();
                                 printStatus();
@@ -597,6 +610,7 @@ class Program
                             {
                                 await gameActions.PurchaseItemAsync(Shop[5].Name);
                                 await gameActions.ReadAndEmptyMessagesAsync();
+                                Thread.Sleep(50);
                                 gameActions.SelectWeapon(Shop[5].Name);
                                 Console.Clear();
                                 printStatus();
@@ -638,6 +652,7 @@ class Program
                             {
                                 await gameActions.PurchaseItemAsync(Shop[6].Name);
                                 await gameActions.ReadAndEmptyMessagesAsync();
+                                Thread.Sleep(50);
                                 gameActions.SelectWeapon(Shop[6].Name);
                                 Console.Clear();
                                 printStatus();
@@ -679,6 +694,7 @@ class Program
                             {
                                 await gameActions.PurchaseItemAsync(Shop[7].Name);
                                 await gameActions.ReadAndEmptyMessagesAsync();
+                                Thread.Sleep(50);
                                 gameActions.SelectWeapon(Shop[7].Name);
                                 Console.Clear();
                                 printStatus();
@@ -719,9 +735,8 @@ class Program
                             try
                             {
                                 await gameActions.PurchaseItemAsync(Shop[8].Name);
-                                Console.Clear();
-                                printStatus();
                                 await gameActions.ReadAndEmptyMessagesAsync();
+                                Thread.Sleep(50);
                                 gameActions.SelectWeapon(Shop[8].Name);
                                 Console.Clear();
                                 printStatus();
@@ -763,6 +778,7 @@ class Program
                             {
                                 await gameActions.PurchaseItemAsync(Shop[9].Name);
                                 await gameActions.ReadAndEmptyMessagesAsync();
+                                Thread.Sleep(50);
                                 gameActions.SelectWeapon(Shop[9].Name);
                                 Console.Clear();
                                 printStatus();
@@ -842,7 +858,7 @@ class Program
         {
             Console.Clear();
             Console.WriteLine($"Name: {username,-34}");
-            Console.WriteLine($"Info-Mod-Key: I, Repair: R, Clear Queue: C, ARROW KEYS to move, SPACE to shoot.");
+            Console.WriteLine($"Info-Mod-Key: I, Repair: R, Clear Queue: V, ARROW KEYS to move, SPACE to shoot.");
 
             for (int i = 0; i < Shop.Count; i++)
             {
