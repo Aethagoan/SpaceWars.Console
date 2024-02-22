@@ -138,7 +138,140 @@ class Program
                 await gameActions.ClearQueueAsync();
             }
 
+            // are we shooting?
+            if (GetAsyncKeyState(SPACEBAR) > 0)
+            {
+                // find the closest target
+
+                // get my position
+                var myposarr = getCurrentPosition();
+                Vector2 currentpos = new Vector2((float)myposarr.Result[0], (float)myposarr.Result[1]);
+
+                // get enemy positions
+                GameStateResponse gameresponse = service.GetGameState().Result;
+
+                /*Console.WriteLine("API Returned ");
+                foreach (var local in gameresponse.PlayerLocations)
+                {
+                    Console.WriteLine(local.X + ", " + local.Y);
+                }*/
+
+                Vector2 enemypos = new();
+                Vector2 closestEnemy;
+                float? shortest;
+
+                if (gameresponse.PlayerLocations != null)
+                {
+
+                    foreach (var location in gameresponse.PlayerLocations)
+                    {
+                        if (location.X == currentpos.X && location.Y == currentpos.Y && (location.X != 0 && location.Y != 0))
+                        {
+                            continue;
+                        }
+
+                        enemypos = new Vector2(location.X, location.Y);
+                        var dist = Vector2.Distance(currentpos, enemypos);
+
+                        if (shortest == null || dist < shortest)
+                        {
+                            shortest = dist;
+                            closestEnemy = enemypos;
+                        }
+
+                    }
+
+
+
+                }
+                else
+                {
+                    Console.WriteLine("fail");
+                }
+
+
+                /*Console.WriteLine("current pos : " + currentpos.X + ", " +  currentpos.Y);
+                Console.WriteLine("targeted enemy pos : " + closestEnemy.X + ", " +  closestEnemy.Y);*/
+                // we have closest enemy
+
+                // calculate angle between them
+                var radian = Math.Atan2((double)(closestEnemy.Y - currentpos.Y), (double)(closestEnemy.X - currentpos.X));
+                /*Console.WriteLine("radian: " + radian);*/
+
+                var angle = ((int)(-1 * radian * (180 / Math.PI)) + 90) % 360;
+
+
+
+                // change angle and fire!
+                if (angle != lastAngle)
+                {
+                    lastAngle = angle;
+                    await gameActions.ClearQueueAsync();
+                    await gameActions.changeHeading(angle);
+                    Console.Clear();
+                    printStatus();
+                    Console.WriteLine(angle);
+                    Console.WriteLine(closestEnemy.X + ", " + closestEnemy.Y);
+
+                }
+
+                await gameActions.FireWeaponAsync();
+
+            }
+
+            // movement
+            // up is pressed
+            if (GetAsyncKeyState(UPARROW) > 0)
+            {
+                // up, left
+                if (GetAsyncKeyState(LEFTARROW) > 0)
+                {
+                    await gameActions.moveHeading(315);
+                }
+                // up right
+                else if (GetAsyncKeyState(RIGHTARROW) > 0)
+                {
+                    await gameActions.moveHeading(45);
+                }
+                // just up
+                else
+                {
+                    await gameActions.moveHeading(0);
+                }
+            }
+            // down is pressed
+            else if (GetAsyncKeyState(DOWNARROW) > 0)
+            {
+                // down, left
+                if (GetAsyncKeyState(LEFTARROW) > 0)
+                {
+                    await gameActions.moveHeading(225);
+                }
+                // down, right
+                else if (GetAsyncKeyState(RIGHTARROW) > 0)
+                {
+                    await gameActions.moveHeading(135);
+                }
+                // just down
+                else
+                {
+                    await gameActions.moveHeading(180);
+                }
+            }
+            // left
+            else if (GetAsyncKeyState(LEFTARROW) > 0)
+            {
+                await gameActions.moveHeading(270);
+            }
+            // right
+            else if (GetAsyncKeyState(RIGHTARROW) > 0)
+            {
+                await gameActions.moveHeading(90);
+            }
+
+
             //info extension
+            // holding i
             if (GetAsyncKeyState(INFOBUTTON) > 0)
             {
                 if (GetAsyncKeyState(0x31) > 0)
@@ -231,141 +364,6 @@ class Program
                         Console.WriteLine(Shop[9]);
                     }
                 }
-            }
-
-            // movement
-            // up is pressed
-            if (GetAsyncKeyState(UPARROW) > 0)
-            {
-                // up, left
-                if (GetAsyncKeyState(LEFTARROW) > 0)
-                {
-                    await gameActions.moveHeading(315);
-                }
-                // up right
-                else if (GetAsyncKeyState(RIGHTARROW) > 0)
-                {
-                    await gameActions.moveHeading(45);
-                }
-                // just up
-                else
-                {
-                    await gameActions.moveHeading(0);
-                }
-            }
-            // down is pressed
-            else if (GetAsyncKeyState(DOWNARROW) > 0)
-            {
-                // down, left
-                if (GetAsyncKeyState(LEFTARROW) > 0)
-                {
-                    await gameActions.moveHeading(225);
-                }
-                // down, right
-                else if (GetAsyncKeyState(RIGHTARROW) > 0)
-                {
-                    await gameActions.moveHeading(135);
-                }
-                // just down
-                else
-                {
-                    await gameActions.moveHeading(180);
-                }
-            }
-            // left
-            else if (GetAsyncKeyState(LEFTARROW) > 0)
-            {
-                await gameActions.moveHeading(270);
-            }
-            // right
-            else if (GetAsyncKeyState(RIGHTARROW) > 0)
-            {
-                await gameActions.moveHeading(90);
-            }
-
-
-
-            // are we shooting?
-            if (GetAsyncKeyState(SPACEBAR) > 0)
-            {
-                // find the closest target
-
-                // get my position
-                var myposarr = getCurrentPosition();
-                Vector2 currentpos = new Vector2((float)myposarr.Result[0], (float)myposarr.Result[1]);
-
-                // get enemy positions
-                GameStateResponse gameresponse = service.GetGameState().Result;
-
-                /*Console.WriteLine("API Returned ");
-                foreach (var local in gameresponse.PlayerLocations)
-                {
-                    Console.WriteLine(local.X + ", " + local.Y);
-                }*/
-
-                Vector2 enemypos = new();
-                Vector2 closestEnemy;
-                float? shortest;
-
-                if (gameresponse.PlayerLocations != null)
-                {
-             
-                        foreach (var location in gameresponse.PlayerLocations)
-                        {
-                            if (location.X == currentpos.X && location.Y == currentpos.Y && (location.X != 0 && location.Y != 0))
-                            {
-                                continue;
-                            }
-
-                            enemypos = new Vector2(location.X, location.Y);
-                            var dist = Vector2.Distance(currentpos, enemypos);
-
-                            if (shortest == null || dist < shortest)
-                            {
-                                shortest = dist;
-                                closestEnemy = enemypos;
-                            }
-
-                        }
-
-                    
-
-                }
-                else
-                {
-                    Console.WriteLine("fail");
-                }
-
-
-                /*Console.WriteLine("current pos : " + currentpos.X + ", " +  currentpos.Y);
-                Console.WriteLine("targeted enemy pos : " + closestEnemy.X + ", " +  closestEnemy.Y);
-*/
-                // we have closest enemy
-
-                // calculate angle between them
-                var radian = Math.Atan2((double)(closestEnemy.Y - currentpos.Y), (double)(closestEnemy.X - currentpos.X));
-                /*Console.WriteLine("radian: " + radian);*/
-
-                var angle = ((int)(-1 * radian * (180 / Math.PI)) + 90) % 360;
-
-                
-
-                // change angle and fire!
-                if (angle != lastAngle)
-                {
-                    lastAngle = angle;
-                    await gameActions.ClearQueueAsync();
-                    await gameActions.changeHeading(angle);
-                    Console.Clear();
-                    printStatus();
-                    Console.WriteLine(angle);
-                    Console.WriteLine(closestEnemy.X + ", " + closestEnemy.Y);
-
-                }
-
-                await gameActions.FireWeaponAsync();
-
-
             }
 
             //weapon switching
@@ -796,7 +794,6 @@ class Program
             }
 
             // repair
-
             if (GetAsyncKeyState(REPAIRBUTTON) > 0)
             {
                 await gameActions.RepairShipAsync();
