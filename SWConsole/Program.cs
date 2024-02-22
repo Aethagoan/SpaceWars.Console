@@ -307,32 +307,32 @@ class Program
                 Vector2 closestEnemy;
                 float? shortest;
 
-                if(gameresponse.PlayerLocations != null)
+                if (gameresponse.PlayerLocations != null)
                 {
                     foreach (var location in gameresponse.PlayerLocations)
-                                    {
-                                        if (location.X == currentpos.X && location.Y == currentpos.Y)
-                                        {
-                                            continue;
-                                        }
+                    {
+                        if (location.X == currentpos.X && location.Y == currentpos.Y)
+                        {
+                            continue;
+                        }
 
-                                        enemypos = new Vector2(location.X, location.Y);
-                                        var dist = Vector2.Distance(currentpos, enemypos);
+                        enemypos = new Vector2(location.X, location.Y);
+                        var dist = Vector2.Distance(currentpos, enemypos);
 
-                                        if (shortest == null || dist < shortest)
-                                        {
-                                            shortest = dist;
-                                            closestEnemy = enemypos;
-                                        }
+                        if (shortest == null || dist < shortest)
+                        {
+                            shortest = dist;
+                            closestEnemy = enemypos;
+                        }
 
-                                    }
+                    }
 
                 }
-                else 
+                else
                 {
                     Console.WriteLine("fail");
                 }
-                
+
 
                 /*Console.WriteLine("current pos : " + currentpos.X + ", " +  currentpos.Y);
                 Console.WriteLine("targeted enemy pos : " + closestEnemy.X + ", " +  closestEnemy.Y);
@@ -354,7 +354,7 @@ class Program
 
                     await gameActions.changeHeading(angle);
                 }
-                
+
                 await gameActions.FireWeaponAsync();
 
 
