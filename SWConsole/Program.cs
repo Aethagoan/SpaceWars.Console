@@ -62,8 +62,14 @@ class Program
         List<PurchasableItem> Shop = new List<PurchasableItem>();
         JoinGameResponse joinGameResponse = null;
 
-        Console.WriteLine("Please enter your name");
+
+
+
+
         var username = "Test1";
+
+
+
 
 
 
@@ -73,9 +79,6 @@ class Program
             token = joinGameResponse.Token;
 
             Shop = joinGameResponse.Shop.Select(item => new PurchasableItem(item.Name, item.MaxDamage, item.PurchaseCost, item.Ranges)).ToList();
-
-            Console.WriteLine($"Token:{joinGameResponse.Token}, Heading: {joinGameResponse.Heading}");
-            Console.WriteLine($"Ship located at: {joinGameResponse.StartingLocation}, Game State is: {joinGameResponse.GameState}, Board Dimensions: {joinGameResponse.BoardWidth}, {joinGameResponse.BoardHeight}");
 
             OpenUrlInBrowser($"{baseAddress.AbsoluteUri}hud?token={token}");
             OpenUrlInBrowser($"{baseAddress.AbsoluteUri}spectatorview");
@@ -147,7 +150,7 @@ class Program
                 if (weapon.Name == gameActions.CurrentWeapon)
                 {
                     var rangething = weapon.Ranges.Last<WeaponRange>();
-                    Console.WriteLine("Farthest range: " + rangething.Distance + ", Effectiveness: " + rangething.Effectiveness);
+                    /*Console.WriteLine("Farthest range: " + rangething.Distance + ", Effectiveness: " + rangething.Effectiveness);*/
                     return rangething.Distance;
                 }
             }
