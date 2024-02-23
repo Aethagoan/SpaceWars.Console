@@ -226,7 +226,7 @@ class Program
                 /*Console.WriteLine("radian: " + radian);*/
 
                 var angle = (int)(((-1 * radian * (180 / Math.PI)) + 90) % 360);
-
+                
 
 
                 // change angle and fire!
@@ -235,29 +235,30 @@ class Program
                     lastAngle = angle;
                     await gameActions.ClearQueueAsync();
                     await gameActions.changeHeading(angle);
-                    Console.Clear();
+                    /*Console.Clear();
                     printStatus();
-                    /*Console.WriteLine(angle);
+                    Console.WriteLine(angle);
                     Console.WriteLine(closestEnemy.X + ", " + closestEnemy.Y);*/
 
                 }
 
                 await gameActions.FireWeaponAsync();
-                Console.Clear();
-                printStatus();
+               /* Console.Clear();
+                printStatus();*/
                 // print whether target is in range
-                if (shortest != null)
+               /* if (shortest != null)
                 {
                     Console.WriteLine("Distance to target: " + shortest);
                     if (shortest < getFarthestRange())
                     {
                         Console.WriteLine("Target is in range!");
+                        Console.WriteLine(closestEnemy.X + ", " + closestEnemy.Y);
                     }
                     else
                     {
                         Console.WriteLine("Not in Range!");
                     }
-                }
+                }*/
                 
 
             }
