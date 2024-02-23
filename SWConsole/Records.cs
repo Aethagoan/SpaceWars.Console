@@ -6,6 +6,7 @@ public record GameStateResponse(string GameState, IEnumerable<Location> PlayerLo
 public record PlayerMessageResponse(string Type, string Message);
 public record QueueActionRequest(string Type, string? Request);
 public record QueueActionResponse(string Message);
-public record ShopResponse(int Cost, string Name, IEnumerable<string> Prerequisites);
-public record PurchasableItem(int Cost, string Name, IEnumerable<string> Prerequisites);
+public record ShopResponse(string Name, int MaxDamage, int PurchaseCost, IEnumerable<WeaponRange> Ranges);
+public record PurchasableItem(string Name, int MaxDamage, int PurchaseCost, IEnumerable<WeaponRange> Ranges);
 public record GameMessage(string Type, string Message);
+public record WeaponRange(int Distance, int Effectiveness);
