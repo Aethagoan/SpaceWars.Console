@@ -62,8 +62,7 @@ class Program
         List<PurchasableItem> Shop = new List<PurchasableItem>();
         JoinGameResponse joinGameResponse = null;
 
-        Console.WriteLine("Please enter your name");
-        var username = "Test1";
+        var username = "Annihilator";
 
 
 
