@@ -12,7 +12,7 @@
 10 - Pressing the corresponding number key will attempt to purchase the weapon if not bought already  
 11 - Pressing the corresponding number key will switch to the weapon if it is purchased  
 12 - Pressing I and a number will display more information about a weapon  
-13 - Pressing C causes the queue to clear  
+13 - Pressing V causes the queue to clear  
 14 - Targeting needs to account for effective range of selected weapon  
 15 - The console properly displays shop/slot information  
 16 - Includes a way to track your position in the program  

@@ -13,21 +13,6 @@ class Program
 {
     static async Task Main(string[] args)
     {
-        //**************************************************************************************
-        //***  |    |    |    |                                            |    |    |    |    |
-        //***  |    |    |    |       Change your key mappings here        |    |    |    |    |
-        //***  V    V    V    V                                            V    V    V    V    V
-        //**************************************************************************************
-        const ConsoleKey forwardKey = ConsoleKey.UpArrow;
-        const ConsoleKey leftKey = ConsoleKey.LeftArrow;
-        const ConsoleKey rightKey = ConsoleKey.RightArrow;
-        const ConsoleKey downKey = ConsoleKey.DownArrow;
-        const ConsoleKey fireKey = ConsoleKey.Spacebar;
-        const ConsoleKey clearQueueKey = ConsoleKey.C;
-        const ConsoleKey infoKey = ConsoleKey.I;
-        const ConsoleKey shopKey = ConsoleKey.S;
-        const ConsoleKey repairKey = ConsoleKey.R;
-        const ConsoleKey readAndEmptyMessagesKey = ConsoleKey.M;
 
         // this should work much better.
         const int UPARROW = 0x26;
@@ -62,22 +47,31 @@ class Program
         List<PurchasableItem> Shop = new List<PurchasableItem>();
         JoinGameResponse joinGameResponse = null;
 
-        var username = "Annihilator";
+
+
+
+
+        var username = "Aidan A";
+
+
 
 
 
         try
         {
             joinGameResponse = await service.JoinGameAsync(username);
-            token = joinGameResponse.Token;
+            if (token == "")
+            {
+                token = joinGameResponse.Token;
+            }
+
 
             Shop = joinGameResponse.Shop.Select(item => new PurchasableItem(item.Name, item.MaxDamage, item.PurchaseCost, item.Ranges)).ToList();
 
-            Console.WriteLine($"Token:{joinGameResponse.Token}, Heading: {joinGameResponse.Heading}");
-            Console.WriteLine($"Ship located at: {joinGameResponse.StartingLocation}, Game State is: {joinGameResponse.GameState}, Board Dimensions: {joinGameResponse.BoardWidth}, {joinGameResponse.BoardHeight}");
-
             OpenUrlInBrowser($"{baseAddress.AbsoluteUri}hud?token={token}");
             OpenUrlInBrowser($"{baseAddress.AbsoluteUri}spectatorview");
+
+            File.WriteAllText("./token.txt", joinGameResponse.Token);
         }
         catch (Exception ex)
         {
@@ -146,7 +140,7 @@ class Program
                 if (weapon.Name == gameActions.CurrentWeapon)
                 {
                     var rangething = weapon.Ranges.Last<WeaponRange>();
-                    Console.WriteLine("Farthest range: " + rangething.Distance + ", Effectiveness: " + rangething.Effectiveness);
+                    /*Console.WriteLine("Farthest range: " + rangething.Distance + ", Effectiveness: " + rangething.Effectiveness);*/
                     return rangething.Distance;
                 }
             }
@@ -186,33 +180,39 @@ class Program
                 Vector2 closestEnemy;
                 float? shortest;
 
-                if (gameresponse.PlayerLocations != null)
+                if (gameresponse != null)
                 {
-
-                    foreach (var location in gameresponse.PlayerLocations)
+                    if (gameresponse.PlayerLocations != null)
                     {
-                        if (location.X == currentpos.X && location.Y == currentpos.Y)
+
+                        foreach (var location in gameresponse.PlayerLocations)
                         {
-                            continue;
+                            // Don't shoot yourself
+                            if (location.X == currentpos.X && location.Y == currentpos.Y)
+                            {
+                                continue;
+                            }
+
+
+                            enemypos = new Vector2(location.X, location.Y);
+                            var dist = Vector2.Distance(currentpos, enemypos);
+
+                            if (shortest == null || dist < shortest)
+                            {
+                                shortest = dist;
+                                closestEnemy = enemypos;
+                            }
+
                         }
 
-                        enemypos = new Vector2(location.X, location.Y);
-                        var dist = Vector2.Distance(currentpos, enemypos);
 
-                        if (shortest == null || dist < shortest)
-                        {
-                            shortest = dist;
-                            closestEnemy = enemypos;
-                        }
 
                     }
+                    else
+                    {
+                        Console.WriteLine("fail");
+                    }
 
-
-
-                }
-                else
-                {
-                    Console.WriteLine("fail");
                 }
 
 
@@ -234,32 +234,35 @@ class Program
                     lastAngle = angle;
                     await gameActions.ClearQueueAsync();
                     await gameActions.changeHeading(angle);
-                    Console.Clear();
+                    /*Console.Clear();
                     printStatus();
-                    /*Console.WriteLine(angle);
+                    Console.WriteLine(angle);
                     Console.WriteLine(closestEnemy.X + ", " + closestEnemy.Y);*/
 
                 }
 
                 await gameActions.FireWeaponAsync();
-                Console.Clear();
-                printStatus();
+                /* Console.Clear();
+                 printStatus();*/
                 // print whether target is in range
-                if (shortest != null)
-                {
-                    Console.WriteLine("Distance to target: " + shortest);
-                    if (shortest < getFarthestRange())
-                    {
-                        Console.WriteLine("Target is in range!");
-                    }
-                    else
-                    {
-                        Console.WriteLine("Not in Range!");
-                    }
-                }
-                
+                /* if (shortest != null)
+                 {
+                     Console.WriteLine("Distance to target: " + shortest);
+                     if (shortest < getFarthestRange())
+                     {
+                         Console.WriteLine("Target is in range!");
+                         Console.WriteLine(closestEnemy.X + ", " + closestEnemy.Y);
+                     }
+                     else
+                     {
+                         Console.WriteLine("Not in Range!");
+                     }
+                 }*/
+
 
             }
+
+
 
             // movement
             // up is pressed
@@ -409,6 +412,8 @@ class Program
                 }
             }
 
+            const int SLEEPTIME = 1000;
+
             //weapon switching
             // if not holding i
             if (!(GetAsyncKeyState(INFOBUTTON) > 0))
@@ -440,7 +445,7 @@ class Program
                             {
                                 await gameActions.PurchaseItemAsync(Shop[0].Name);
                                 await gameActions.ReadAndEmptyMessagesAsync();
-                                Thread.Sleep(100);
+                                Thread.Sleep(SLEEPTIME);
                                 gameActions.SelectWeapon(Shop[0].Name);
                                 Console.Clear();
                                 printStatus();
@@ -482,7 +487,7 @@ class Program
                             {
                                 await gameActions.PurchaseItemAsync(Shop[1].Name);
                                 await gameActions.ReadAndEmptyMessagesAsync();
-                                Thread.Sleep(100);
+                                Thread.Sleep(SLEEPTIME);
                                 gameActions.SelectWeapon(Shop[1].Name);
                                 Console.Clear();
                                 printStatus();
@@ -524,7 +529,7 @@ class Program
                             {
                                 await gameActions.PurchaseItemAsync(Shop[2].Name);
                                 await gameActions.ReadAndEmptyMessagesAsync();
-                                Thread.Sleep(100);
+                                Thread.Sleep(SLEEPTIME);
                                 gameActions.SelectWeapon(Shop[2].Name);
                                 Console.Clear();
                                 printStatus();
@@ -566,7 +571,7 @@ class Program
                             {
                                 await gameActions.PurchaseItemAsync(Shop[3].Name);
                                 await gameActions.ReadAndEmptyMessagesAsync();
-                                Thread.Sleep(100);
+                                Thread.Sleep(SLEEPTIME);
                                 gameActions.SelectWeapon(Shop[3].Name);
                                 Console.Clear();
                                 printStatus();
@@ -608,7 +613,7 @@ class Program
                             {
                                 await gameActions.PurchaseItemAsync(Shop[4].Name);
                                 await gameActions.ReadAndEmptyMessagesAsync();
-                                Thread.Sleep(100);
+                                Thread.Sleep(SLEEPTIME);
                                 gameActions.SelectWeapon(Shop[4].Name);
                                 Console.Clear();
                                 printStatus();
@@ -651,7 +656,7 @@ class Program
                             {
                                 await gameActions.PurchaseItemAsync(Shop[5].Name);
                                 await gameActions.ReadAndEmptyMessagesAsync();
-                                Thread.Sleep(100);
+                                Thread.Sleep(SLEEPTIME);
                                 gameActions.SelectWeapon(Shop[5].Name);
                                 Console.Clear();
                                 printStatus();
@@ -693,7 +698,7 @@ class Program
                             {
                                 await gameActions.PurchaseItemAsync(Shop[6].Name);
                                 await gameActions.ReadAndEmptyMessagesAsync();
-                                Thread.Sleep(100);
+                                Thread.Sleep(SLEEPTIME);
                                 gameActions.SelectWeapon(Shop[6].Name);
                                 Console.Clear();
                                 printStatus();
@@ -735,7 +740,7 @@ class Program
                             {
                                 await gameActions.PurchaseItemAsync(Shop[7].Name);
                                 await gameActions.ReadAndEmptyMessagesAsync();
-                                Thread.Sleep(100);
+                                Thread.Sleep(SLEEPTIME);
                                 gameActions.SelectWeapon(Shop[7].Name);
                                 Console.Clear();
                                 printStatus();
@@ -777,7 +782,7 @@ class Program
                             {
                                 await gameActions.PurchaseItemAsync(Shop[8].Name);
                                 await gameActions.ReadAndEmptyMessagesAsync();
-                                Thread.Sleep(100);
+                                Thread.Sleep(SLEEPTIME);
                                 gameActions.SelectWeapon(Shop[8].Name);
                                 Console.Clear();
                                 printStatus();
@@ -819,7 +824,7 @@ class Program
                             {
                                 await gameActions.PurchaseItemAsync(Shop[9].Name);
                                 await gameActions.ReadAndEmptyMessagesAsync();
-                                Thread.Sleep(100);
+                                Thread.Sleep(SLEEPTIME);
                                 gameActions.SelectWeapon(Shop[9].Name);
                                 Console.Clear();
                                 printStatus();
